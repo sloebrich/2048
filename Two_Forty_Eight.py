@@ -1,8 +1,8 @@
-# -*- coding: utf-8 -*-
+
 """
 Created on Mon Dec 16 17:23:53 2019
 
-@author: steff
+@author: Steffen Löbrich
 """
 
 import numpy as np
@@ -10,7 +10,7 @@ import random
 import time
 
 DECISION_TIME = 0.2
-MAX_DEPTH = 6
+MAX_DEPTH = 4
 
 def merge(cells, n=4):
     if cells:
@@ -77,51 +77,16 @@ def child_list(board, player):
 def max_value(board):
     return int(np.max(board))
 
-#def gradient_matrix(board):
-#    gradient = np.array([ 
-#       [[ 3,  2,  1,  0],
-#        [ 2,  1,  0, -1],
-#        [ 1,  0, -1, -2],
-#        [ 0, -1, -2, -3]],
-#
-#       [[ 0,  1,  2,  3],
-#        [-1,  0,  1,  2],
-#        [-2, -1,  0,  1],
-#        [-3, -2, -1,  0]],
-#
-#       [[ 0, -1, -2, -3],
-#        [ 1,  0, -1, -2],
-#        [ 2,  1,  0, -1],
-#        [ 3,  2,  1,  0]],
-#
-#       [[-3, -2, -1,  0],
-#        [-2, -1,  0,  1],
-#        [-1,  0,  1,  2],
-#        [ 0,  1,  2,  3]]
-#       ])
-#    return int(max([np.sum(ray) for ray in gradient*board]))
-
 def gradient_matrix(board):
     n=len(board)
     base = 4
-    exponents = [7,3,1,0,-1,-3,-7]
+    exponents = [8,3,1,0,-1,-3,-8]
     gradient = np.zeros((4,4))
     for i in range(n):
         for j in range(n):
             gradient[i,j] = base**exponents[i+j]
     high_board = np.where(board<=4, 0, board)
     return int(np.sum(gradient*high_board))
-
-def merger(board):
-    merger=0
-    n=len(board)
-    for i in range(0,n):
-        for j in range(0,n):
-            if i<n-1 and board[i+1,j]==board[i,j]:
-                merger+=board[i,j]
-            if j<n-1 and board[i,j+1]==board[i,j]:
-                merger+=board[i,j]
-    return int(merger/8)
 
 def empty_tiles(board):
     return len(np.argwhere(board==0))
@@ -152,7 +117,6 @@ def min_util(board,a,b, depth, starting_time, utility):
     children = child_list(board, 'cp')
     if not children or depth==0 or time.time()-starting_time > DECISION_TIME:
         return utility(board)
- #   children.sort(key=lambda x: utility(x))
     for child in children:
         v=min(v,max_util(child,a,b, depth-1, starting_time, utility))
         if v<=a:
