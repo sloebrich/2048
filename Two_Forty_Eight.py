@@ -123,16 +123,3 @@ def min_util(board,a,b, depth, starting_time, utility):
             return v
         b=min(b,v)
     return v
-
-def Game(utility=utility_function):
-    board = np.zeros((4,4))
-    i=0
-    while empty_tiles(board):
-        i+=1
-        if not i%50:
-            print(board)
-        board = computer_move(board)
-        if child_list(board, 'pl'):
-            direction = minimax_decision(board, utility)
-            board = player_move(board, direction)  
-    return board
