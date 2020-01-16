@@ -1,10 +1,3 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
-# Pierre Haessig — May 2014
-"""A simple code to interact in Python with the "real" 2048 game in web browser.
-"""
-
-from __future__ import print_function
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
