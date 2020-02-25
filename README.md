@@ -1,2 +1,2 @@
-# 2048-AI
-Python AI playing the game 2048 in a browser.
+# 2048
+Implementation of the 2048 sliding puzzle.  
