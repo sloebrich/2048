@@ -1,0 +1,136 @@
+
+.tile-container {
+  position: relative;
+  border-color: #fff;
+  border-radius: 12px;
+  background-color: #787878;
+  width: 400px;
+  height: 400px;
+  border: 3px solid;
+  padding: 1%;
+  margin: 5% auto;
+}
+
+.tile {
+  position: absolute;
+  width: 23%;
+  height: 23%;
+  padding-top: 5%;
+  border: 3px solid;
+  border-color: #484848;
+  text-align: center;
+  font-size: 2rem;
+  font-weight: bold;
+  border-radius: 12px;
+  color: #484848;
+  margin: 1%;
+  font-family: 'Open Sans';
+}
+
+.row1 {
+  top: 0%;
+}
+
+.row2 {
+  top: 25%;
+}
+
+.row3 {
+  top:50%;
+}
+
+.row4 {
+  top: 75%
+}
+
+.col1 {
+  left:0%;
+}
+
+.col2 {
+  left:25%;
+}
+
+.col3 {
+  left:50%;
+}
+
+.col4 {
+  left:75%;
+}
+
+.val2 {
+  background-color: #F5F5F5;
+}
+
+.val4 {
+ background-color: lightpink;
+}
+
+.val8 {
+ background-color: #66cccc;
+}
+
+
+.val16{
+background-color: #cc0066;
+color : #F5F5F5;
+}
+
+.val32{
+  background-color: #ff6666;
+  color : #F5F5F5;
+}
+
+.val64{
+  background-color: #ffcc00;
+}
+
+.val128 {
+  background-color: #552244;
+  color : #F5F5F5;
+}
+
+.val256 {
+  background-color: #f39422;
+  color : #F5F5F5;
+}
+
+.val512 {
+  background-color: #537ec5;
+  color : #F5F5F5;
+}
+
+.val1024 {
+ background-color: #293a80;
+ color : #F5F5F5;
+}
+
+.val2048 {
+  background-color: #010038;
+  color : #F5F5F5;
+}
+
+.gameover {
+  left: 50%;
+ transform: translateX(-50%);
+ top: 25%;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  position: absolute;
+}
+
+.gameover button {
+  background-color: #555555;
+  color: rgba(255, 255, 255, 1);
+  border: 3px solid;
+  font-size: 30px;
+  border-radius: 12px;
+  padding: 3% 5%;
+}
+
+.gameover p {
+  color: #d9534f;
+  font-size: 48px;
+}
