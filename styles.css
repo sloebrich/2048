@@ -145,3 +145,16 @@ color : #F5F5F5;
   color: #d9534f;
   font-size: 48px;
 }
+
+@media only screen
+and (min-device-width : 768px)
+and (max-device-width : 1366px)  {
+  .tile-container {
+    width: 500px;
+    height: 500px;
+    margin-top: 10%;
+  }
+  .tile {
+    padding-top: 6%;
+  }
+}
