@@ -11,6 +11,13 @@
   margin: 5% auto;
 }
 
+.lock-screen {
+    height: 100%;
+    overflow: hidden;
+    width: 100%;
+    position: fixed;
+}
+
 .tile {
   position: absolute;
   width: 23%;

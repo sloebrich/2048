@@ -41,11 +41,6 @@ $(document).on({'touchstart': function(e){
         startX = touchobj.pageX;
         startY = touchobj.pageY;
         startTime = new Date().getTime(); // record time when finger first makes contact with surface
-        e.preventDefault();
-    }});
-
-$(document).on({'touchmove': function(e){
-        e.preventDefault(); // prevent scrolling when inside DIV
     }});
 
 $(document).on({'touchend': function(e){
