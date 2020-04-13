@@ -29,6 +29,61 @@ $(document).keydown(function(event) {
   }
 });
 
+const threshold = 150; //required min distance traveled to be considered swipe
+const allowedTime = 400; // maximum time allowed to travel that distance
+const tolerance = 100;
+var startX;
+var startY;
+var startTime;
+
+$(document).on({'touchstart': function(e){
+        var touchobj = e.changedTouches[0];
+        startX = touchobj.pageX;
+        startY = touchobj.pageY;
+        startTime = new Date().getTime(); // record time when finger first makes contact with surface
+        e.preventDefault();
+    }});
+
+$(document).on({'touchmove': function(e){
+        e.preventDefault(); // prevent scrolling when inside DIV
+    }});
+
+$(document).on({'touchend': function(e){
+        let touchobj = e.changedTouches[0];
+        let distX = touchobj.pageX - startX; // get total dist traveled by finger while in contact with surface
+        let distY = touchobj.pageY - startY;
+        let elapsedTime = new Date().getTime() - startTime; // get time elapsed
+        let direction;
+        // check that elapsed time is within specified, horizontal dist traveled >= threshold, and vertical dist traveled <= 100
+        if(elapsedTime <= allowedTime){
+          if( distX >= threshold && Math.abs(distY) <= tolerance){
+            direction = "right";
+          }
+        else if( distX <= -threshold && Math.abs(distY) <= tolerance){
+            direction = "left";
+        }
+        else if ( distY <= -threshold && Math.abs(distX) <= tolerance){
+          direction = "up";
+        }
+        else if ( distY >= threshold && Math.abs(distX) <= tolerance){
+            direction = "down";
+        }
+      }
+      if(direction){
+        if (validMove(direction) && !gameOver) {
+          Promise.all(animations).then(handleKeydown(direction));
+          Promise.all(animations).then(computerMove());
+        } else if (gameOver) {
+          $(".tile-container").fadeTo("slow", 0.4);
+          $("<div class='gameover'><p>Game Over</p><button>Try again</button></div>").appendTo($("body"));
+          $("button").on({'touchstart': function() {
+            location.reload();
+          }});
+        }}
+    }});
+
+
+
 function moveTile(tile, pos, animations) {
   let tileX = /row\d/.exec(tile.attr("class"))[0];
   let tileY = /col\d/.exec(tile.attr("class"))[0];
