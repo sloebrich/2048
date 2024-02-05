@@ -1,370 +1,197 @@
 // jshint esversion:6
-const moveSpeed = 75;
-const mergeSpeed = 200;
-const spawnSpeed = 500;
+let isGameOver = false;
 
-var animations = [];
-var gameOver = false;
-
-$(function() {
-  computerMove();
-  computerMove();
+gameover.querySelector("button").addEventListener("click", () => {
+	location.reload();
 });
 
+computerMove();
+computerMove();
 
-$(document).keydown(function(event) {
-  let key = event.key;
-  if (["ArrowUp", "ArrowLeft", "ArrowDown", "ArrowRight"].includes(key)) {
-    let direction = /Arrow([A-Z]\w+)/.exec(key)[1].toLowerCase();
-    if (validMove(direction) && !gameOver) {
-      Promise.all(animations).then(handleKeydown(direction));
-      Promise.all(animations).then(computerMove());
-    } else if (gameOver) {
-      $(".tile-container").fadeTo("slow", 0.4);
-      $("<div class='gameover'><p>Game Over</p><button>Try again</button></div>").appendTo($("body"));
-      $("button").click(function() {
-        location.reload();
-      });
-    }
-  }
+document.addEventListener("transitionend", (event) => {
+	if (
+		!event.target.classList.contains("tile") ||
+		event.propertyName !== "opacity"
+	)
+		return;
+	if (event.target.style.opacity === "0") {
+		event.target.remove();
+	}
 });
 
-const threshold = 150; //required min distance traveled to be considered swipe
-const allowedTime = 400; // maximum time allowed to travel that distance
-const tolerance = 100;
-var startX;
-var startY;
-var startTime;
+document.addEventListener("keydown", (event) => {
+	if (
+		["ArrowUp", "ArrowLeft", "ArrowDown", "ArrowRight"].includes(event.key)
+	) {
+		const direction = event.key.slice(5).toLowerCase();
+		handleInput(direction);
+	}
+});
 
-$(document).on({'touchstart': function(e){
-        var touchobj = e.changedTouches[0];
-        startX = touchobj.pageX;
-        startY = touchobj.pageY;
-        startTime = new Date().getTime(); // record time when finger first makes contact with surface
-    }});
-
-$(document).on({'touchend': function(e){
-        let touchobj = e.changedTouches[0];
-        let distX = touchobj.pageX - startX; // get total dist traveled by finger while in contact with surface
-        let distY = touchobj.pageY - startY;
-        let elapsedTime = new Date().getTime() - startTime; // get time elapsed
-        let direction;
-        // check that elapsed time is within specified, horizontal dist traveled >= threshold, and vertical dist traveled <= 100
-        if(elapsedTime <= allowedTime){
-          if( distX >= threshold && Math.abs(distY) <= tolerance){
-            direction = "right";
-          }
-        else if( distX <= -threshold && Math.abs(distY) <= tolerance){
-            direction = "left";
-        }
-        else if ( distY <= -threshold && Math.abs(distX) <= tolerance){
-          direction = "up";
-        }
-        else if ( distY >= threshold && Math.abs(distX) <= tolerance){
-            direction = "down";
-        }
-      }
-      if(direction){
-        if (validMove(direction) && !gameOver) {
-          Promise.all(animations).then(handleKeydown(direction));
-          Promise.all(animations).then(computerMove());
-        } else if (gameOver) {
-          $(".tile-container").fadeTo("slow", 0.4);
-          $("<div class='gameover'><p>Game Over</p><button>Try again</button></div>").appendTo($("body"));
-          $("button").on({'touchstart': function() {
-            location.reload();
-          }});
-        }}
-    }});
-
-
-
-function moveTile(tile, pos, animations) {
-  let tileX = /row\d/.exec(tile.attr("class"))[0];
-  let tileY = /col\d/.exec(tile.attr("class"))[0];
-  const percs = [null, "0%", "25%", "50%", "75%"];
-  if (tileX == "row" + pos.x) {
-    const animationSpeed = moveSpeed * Math.abs(tileY[3] - pos.y);
-    let move = tile.animate({
-      "left": percs[pos.y]
-    }, animationSpeed).promise();
-    animations.push(move);
-    tile.addClass("col" + pos.y);
-    tile.removeClass(tileY);
-  } else if (tileY == "col" + pos.y) {
-    const animationSpeed = moveSpeed * Math.abs(tileX[3] - pos.x);
-    let move = tile.animate({
-      "top": percs[pos.x]
-    }, animationSpeed).promise();
-    animations.push(move);
-    tile.addClass("row" + pos.x);
-    tile.removeClass(tileX);
-  }
-
+function handleInput(direction) {
+	if (isGameOver) {
+		container.style.opacity = 0.4;
+		gameover.style.display = "inline-block";
+		return;
+	}
+	if (validMove(direction)) {
+		handleKeydown(direction);
+		setTimeout(computerMove, 250);
+	}
 }
 
-function merge(pos, value, animations) {
-  let tiles = $(".row" + pos.x + ".col" + pos.y + ".val" + value);
-  const mergeTile = $("<div class='tile row" + pos.x + " col" + pos.y + " val" + (2 * value) + "'>" + (2 * value) + "</div>");
-  let createNew = mergeTile.appendTo($(".tile-container")).animate({
-    "width": "+=10px",
-    "height": "+=10px"
-  }, 100).animate({
-    "width": "-=10px",
-    "height": "-=10px"
-  }, 100).promise();
-  let removeOld = tiles.fadeOut(mergeSpeed, function() {
-    tiles.remove();
-  }).promise();
-  animations.push(createNew, removeOld);
+const SWIPE_THRESHOLD = 150;
+const SWIPE_TIME = 400;
+const SWIPE_TOLERANCE = 100;
+let startX;
+let startY;
+let startTime;
+
+document.addEventListener("touchstart", (event) => {
+	const touchobj = event.changedTouches[0];
+	startX = touchobj.pageX;
+	startY = touchobj.pageY;
+	startTime = new Date().getTime();
+});
+
+document.addEventListener("touchend", (event) => {
+	const elapsedTime = new Date().getTime() - startTime;
+	if (elapsedTime > SWIPE_TIME) return;
+
+	const distX = event.changedTouches[0].pageX - startX;
+	const distY = event.changedTouches[0].pageY - startY;
+
+	const direction =
+		distX > SWIPE_THRESHOLD && Math.abs(distY) < SWIPE_TOLERANCE
+			? "right"
+			: distX < -SWIPE_THRESHOLD && Math.abs(distY) < SWIPE_TOLERANCE
+			? "left"
+			: distY < -SWIPE_THRESHOLD && Math.abs(distX) < SWIPE_TOLERANCE
+			? "up"
+			: distY > SWIPE_THRESHOLD && Math.abs(distX) < SWIPE_TOLERANCE
+			? "down"
+			: null;
+	if (!direction) return;
+
+	handleInput(direction);
+});
+
+function moveTile(tile, rowNum, colNum) {
+	const tileX = /row\d/.exec(tile.className)[0];
+	const tileY = /col\d/.exec(tile.className)[0];
+	if (tileX === "row" + rowNum) {
+		tile.classList.add("col" + colNum);
+		tile.classList.remove(tileY);
+	} else if (tileY === "col" + colNum) {
+		tile.classList.add("row" + rowNum);
+		tile.classList.remove(tileX);
+	}
+}
+
+function mergeTiles(rowNum, colNum, value) {
+	const tilesAtPosition = document.querySelectorAll(
+		`.row${rowNum}.col${colNum}.val${value}`
+	);
+	createTile(rowNum, colNum, 2 * value);
+	for (const tile of tilesAtPosition) {
+		tile.style.opacity = 0;
+	}
+}
+
+function findTile(rowNum, colNum) {
+	return document.querySelector(`.row${rowNum}.col${colNum}`);
+}
+
+function createTile(rowNum, colNum, value) {
+	const newTile = document.createElement("div");
+	newTile.classList.add(
+		"tile",
+		`row${rowNum}`,
+		`col${colNum}`,
+		`val${value}`
+	);
+	newTile.innerHTML = value;
+	container.append(newTile);
 }
 
 function computerMove() {
-  let emptyTiles = [];
-  for (let i = 1; i <= 4; i++) {
-    for (let j = 1; j <= 4; j++) {
-      if ($(".row" + i + ".col" + j).length == 0) {
-        emptyTiles.push([i, j]);
-      }
-    }
-  }
-  tileIndex = Math.floor(emptyTiles.length * Math.random());
-  let x = emptyTiles[tileIndex][0];
-  let y = emptyTiles[tileIndex][1];
-  let v = 2;
-  if (Math.random() > 0.9) {
-    v = 4;
-  }
-  animations.push($("<div class='tile row" + x + " col" + y + " val" + v + "'>" + v + "</div>")
-    .hide().appendTo($(".tile-container")).fadeIn(spawnSpeed, function() {
-      if (emptyTiles.length == 1) {
-        gameOver = true;
-      }
-    }).promise());
+	const emptyTiles = [];
+	for (let i = 1; i <= 4; i++) {
+		for (let j = 1; j <= 4; j++) {
+			if (!findTile(i, j)) {
+				emptyTiles.push([i, j]);
+			}
+		}
+	}
+	if (!emptyTiles.length) {
+		isGameOver = true;
+		return;
+	}
+	const tileIndex = Math.floor(emptyTiles.length * Math.random());
+	const posX = emptyTiles[tileIndex][0];
+	const posY = emptyTiles[tileIndex][1];
+	const value = Math.random() < 0.9 ? 2 : 4;
+	createTile(posX, posY, value);
 }
 
 function handleKeydown(direction) {
-  switch (direction) {
-    case "up":
-      for (let i = 1; i <= 4; i++) {
-        let j = 1;
-        let k = 2;
-        while (j < 4 && k <= 4) {
-          let occupied = $(".row" + j + ".col" + i);
-          let toBeMoved = $(".row" + k + ".col" + i);
-          if (toBeMoved.length == 0) {
-            k++;
-          } else if (occupied.length == 0) {
-            moveTile(toBeMoved, {
-              x: j,
-              y: i
-            }, animations);
-            k++;
-          } else if (occupied.text() === toBeMoved.text()) {
-            let v = Number(occupied.text());
-            moveTile(toBeMoved, {
-              x: j,
-              y: i
-            }, animations);
-            merge({
-              x: j,
-              y: i
-            }, v, animations);
-            j++;
-            k = j + 1;
-          } else {
-            j++;
-            k = j + 1;
-          }
-        }
-      }
-      break;
-    case "down":
-      for (let i = 1; i <= 4; i++) {
-        let j = 4;
-        let k = 3;
-        while (j > 1 && k >= 1) {
-          let occupied = $(".row" + j + ".col" + i);
-          let toBeMoved = $(".row" + k + ".col" + i);
-          if (toBeMoved.length == 0) {
-            k--;
-          } else if (occupied.length == 0) {
-            moveTile(toBeMoved, {
-              x: j,
-              y: i
-            }, animations);
-            k--;
-          } else if (occupied.text() === toBeMoved.text()) {
-            let v = Number(occupied.text());
-            moveTile(toBeMoved, {
-              x: j,
-              y: i
-            }, animations);
-            merge({
-              x: j,
-              y: i
-            }, v, animations);
-            j--;
-            k = j - 1;
-          } else {
-            j--;
-            k = j - 1;
-          }
-        }
-      }
-      break;
-    case "left":
-      for (let i = 1; i <= 4; i++) {
-        let j = 1;
-        let k = 2;
-        while (j < 4 && k <= 4) {
-          let occupied = $(".row" + i + ".col" + j);
-          let toBeMoved = $(".row" + i + ".col" + k);
-          if (toBeMoved.length == 0) {
-            k++;
-          } else if (occupied.length == 0) {
-            moveTile(toBeMoved, {
-              x: i,
-              y: j
-            }, animations);
-            k++;
-          } else if (occupied.text() === toBeMoved.text()) {
-            let v = Number(occupied.text());
-            moveTile(toBeMoved, {
-              x: i,
-              y: j
-            }, animations);
-            merge({
-              x: i,
-              y: j
-            }, v, animations);
-            j++;
-            k = j + 1;
-          } else {
-            j++;
-            k = j + 1;
-          }
-        }
-      }
-      break;
-    case "right":
-      for (let i = 1; i <= 4; i++) {
-        let j = 4;
-        let k = 3;
-        while (j > 1 && k >= 1) {
-          let occupied = $(".row" + i + ".col" + j);
-          let toBeMoved = $(".row" + i + ".col" + k);
-          if (toBeMoved.length == 0) {
-            k--;
-          } else if (occupied.length == 0) {
-            moveTile(toBeMoved, {
-              x: i,
-              y: j
-            }, animations);
-            k--;
-          } else if (occupied.text() === toBeMoved.text()) {
-            let v = Number(occupied.text());
-            moveTile(toBeMoved, {
-              x: i,
-              y: j
-            }, animations);
-            merge({
-              x: i,
-              y: j
-            }, v, animations);
-            j--;
-            k = j - 1;
-          } else {
-            j--;
-            k = j - 1;
-          }
-        }
-      }
-      break;
-  }
+	if (!["up", "down", "left", "right"].includes(direction)) return;
+
+	const startJ = ["up", "left"].includes(direction) ? 1 : 4;
+	const startK = ["up", "left"].includes(direction) ? 2 : 3;
+	const inc = ["up", "left"].includes(direction) ? 1 : -1;
+	const whileCond = (j, k) =>
+		["up", "left"].includes(direction) ? j < 4 && k <= 4 : j > 1 && k >= 1;
+	const pos = (i, j) =>
+		["up", "down"].includes(direction) ? [j, i] : [i, j];
+
+	for (let i = 1; i <= 4; i++) {
+		let j = startJ;
+		let k = startK;
+		while (whileCond(j, k)) {
+			let occupied = findTile(...pos(i, j));
+			let toBeMoved = findTile(...pos(i, k));
+			if (!toBeMoved) {
+				k += inc;
+			} else if (!occupied) {
+				moveTile(toBeMoved, ...pos(i, j));
+				k += inc;
+			} else {
+				if (occupied.innerHTML === toBeMoved.innerHTML) {
+					moveTile(toBeMoved, ...pos(i, j));
+					mergeTiles(...pos(i, j), Number(occupied.innerHTML));
+				}
+				j += inc;
+				k = j + inc;
+			}
+		}
+	}
 }
 
 function validMove(direction) {
-  switch (direction) {
-    case "up":
-      for (let i = 1; i <= 4; i++) {
-        let s = "";
-        let prevValue = '';
-        for (let j = 1; j <= 4; j++) {
-          let occupied = $(".row" + j + ".col" + i);
-          if (occupied.length > 0) {
-            s += j;
-            value = occupied.text();
-            if (value == prevValue) {
-              return true;
-            }
-            prevValue = value;
-          }
-        }
-        if (!"1234".startsWith(s)) {
-          return true;
-        }
-      }
-      return false;
-    case "down":
-      for (let i = 1; i <= 4; i++) {
-        let s = "";
-        let prevValue = '';
-        for (let j = 1; j <= 4; j++) {
-          let occupied = $(".row" + j + ".col" + i);
-          if (occupied.length > 0) {
-            s += j;
-            value = occupied.text();
-            if (value == prevValue) {
-              return true;
-            }
-            prevValue = value;
-          }
-        }
-        if (!"1234".endsWith(s)) {
-          return true;
-        }
-      }
-      return false;
-    case "left":
-      for (let i = 1; i <= 4; i++) {
-        let s = "";
-        let prevValue = '';
-        for (let j = 1; j <= 4; j++) {
-          let occupied = $(".col" + j + ".row" + i);
-          if (occupied.length > 0) {
-            s += j;
-            value = occupied.text();
-            if (value == prevValue) {
-              return true;
-            }
-            prevValue = value;
-          }
-        }
-        if (!"1234".startsWith(s)) {
-          return true;
-        }
-      }
-      return false;
-    case "right":
-      for (let i = 1; i <= 4; i++) {
-        let s = "";
-        let prevValue = '';
-        for (let j = 1; j <= 4; j++) {
-          let occupied = $(".col" + j + ".row" + i);
-          if (occupied.length > 0) {
-            s += j;
-            value = occupied.text();
-            if (value == prevValue) {
-              return true;
-            }
-            prevValue = value;
-          }
-        }
-        if (!"1234".endsWith(s)) {
-          return true;
-        }
-      }
-      return false;
-  }
+	if (!["up", "down", "left", "right"].includes(direction)) return false;
+
+	const pos = (i, j) =>
+		["up", "down"].includes(direction) ? [j, i] : [i, j];
+	const moveHasGaps = (s) =>
+		["up", "left"].includes(direction)
+			? !"1234".startsWith(s)
+			: !"1234".endsWith(s);
+
+	for (let i = 1; i <= 4; i++) {
+		let occupiedPositions = "";
+		let prevValue;
+		for (let j = 1; j <= 4; j++) {
+			let occupied = findTile(...pos(i, j));
+			if (!occupied) continue;
+
+			occupiedPositions += j;
+			value = occupied.innerHTML;
+			if (value === prevValue) return true;
+
+			prevValue = value;
+		}
+		if (moveHasGaps(occupiedPositions)) return true;
+	}
+	return false;
 }

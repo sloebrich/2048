@@ -1,9 +1,13 @@
+* {
+  box-sizing: border-box;
+}
 
 body {
   touch-action: none;
+  line-height: 1.5;
 }
 
-.tile-container {
+#container {
   position: relative;
   border-color: #fff;
   border-radius: 12px;
@@ -26,16 +30,18 @@ body {
   position: absolute;
   width: 23%;
   height: 23%;
-  padding-top: 5%;
   border: 3px solid;
   border-color: #484848;
-  text-align: center;
-  font-size: 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 2.5rem;
   font-weight: bold;
   border-radius: 12px;
   color: #484848;
   margin: 1%;
-  font-family: 'Open Sans';
+  font-family: monospace;
+  transition: top 75ms, left 75ms, opacity 200ms;
 }
 
 .row1 {
@@ -122,26 +128,27 @@ color : #F5F5F5;
   color : #F5F5F5;
 }
 
-.gameover {
+#gameover {
   left: 50%;
- transform: translateX(-50%);
- top: 25%;
+  transform: translateX(-50%);
+  top: 100px;
   text-align: center;
   text-decoration: none;
-  display: inline-block;
+  display: none;
   position: absolute;
 }
 
-.gameover button {
+#gameover button {
   background-color: #555555;
   color: rgba(255, 255, 255, 1);
   border: 3px solid;
   font-size: 30px;
   border-radius: 12px;
   padding: 3% 5%;
+  cursor: pointer;
 }
 
-.gameover p {
+#gameover p {
   color: #d9534f;
   font-size: 48px;
 }
@@ -153,8 +160,5 @@ and (max-device-width : 1366px)  {
     width: 500px;
     height: 500px;
     margin-top: 10%;
-  }
-  .tile {
-    padding-top: 6%;
   }
 }
