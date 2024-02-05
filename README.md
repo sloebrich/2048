@@ -1,5 +1,5 @@
 # 2048
-Implementation of the 2048 sliding puzzle by Gabriele Cirulli using jQuery 3.4.1 and jQuery UI 1.12.1. Play the game here:
+Light-weight implementation of the popular sliding puzzle using only HTML, CSS, and plain JavaScript. Play the game here:
 
 https://sloebrich.github.io/2048/
 
